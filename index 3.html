@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="gl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Refrankenstein</title>
+<meta name="description" content="Refráns en galego, castelán, catalán e euskera. Mestúraos, vota os teus favoritos e achega os que coñezas.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧟</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDF4; --paper:#FBFCFE; --ink:#16203F; --soft:#5A6585;
+  --head:#2340B5; --headbg:#DCE3FA; --tail:#9A6A00; --tailbg:#FCEFC4; --seam:#F2B705;
+  --line:#C9D1E3;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1528; --paper:#18203A; --ink:#E8ECF7; --soft:#9AA5C4;
+    --head:#9DB0FF; --headbg:#22306B; --tail:#FFD15C; --tailbg:#4A3A10; --seam:#F2B705; --line:#2C365A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1528; --paper:#18203A; --ink:#E8ECF7; --soft:#9AA5C4;
+  --head:#9DB0FF; --headbg:#22306B; --tail:#FFD15C; --tailbg:#4A3A10; --seam:#F2B705; --line:#2C365A;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Rubik,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:2rem;margin:0;letter-spacing:-.01em}
+h1 span{color:var(--head)} h1 em{font-style:normal;color:var(--tail)}
+.flags{display:flex;gap:6px}
+.flags button{border:2px solid transparent;background:none;padding:2px;border-radius:6px;cursor:pointer;line-height:0}
+.flags button[aria-pressed="true"]{border-color:var(--ink)}
+.flags svg{width:30px;height:20px;border-radius:3px;box-shadow:0 0 0 1px var(--line)}
+.tabs{display:flex;gap:4px;margin:18px 0 20px;background:var(--paper);padding:4px;border-radius:14px;border:1px solid var(--line)}
+.tabs button{flex:1;border:0;background:none;color:var(--soft);font:500 .95rem Rubik,sans-serif;padding:10px 6px;border-radius:10px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible{outline:3px solid var(--seam);outline-offset:2px}
+
+/* The split card */
+.card{background:var(--paper);border-radius:22px;border:1px solid var(--line);overflow:hidden}
+.half{padding:26px 22px;font-family:"Young Serif",Georgia,serif;font-size:clamp(1.45rem,5.4vw,2rem);line-height:1.25;position:relative}
+.half.h{background:var(--headbg);color:var(--head)}
+.half.t{background:var(--tailbg);color:var(--tail)}
+.seam{height:6px;background:repeating-linear-gradient(90deg,var(--seam) 0 14px,transparent 14px 22px)}
+.tag{display:inline-block;font:500 .75rem Rubik,sans-serif;color:var(--soft);padding:10px 22px 0}
+.card .tag + .half{padding-top:12px}
+.half.in-l{animation:inl .35s ease-out}
+.half.in-r{animation:inr .35s ease-out}
+@keyframes inl{from{transform:translateX(-30px);opacity:0}}
+@keyframes inr{from{transform:translateX(30px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.half.in-l,.half.in-r{animation:none}}
+
+.origin{font-size:.88rem;color:var(--soft);padding:14px 22px 18px;border-top:1px solid var(--line)}
+.origin b{font-weight:500;color:var(--ink)}
+.origin p{margin:4px 0}
+.origin .dh{color:var(--head)} .origin .dt{color:var(--tail)}
+
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:500 1rem Rubik,sans-serif;cursor:pointer;background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.btn.main{background:var(--ink);color:var(--paper);border-color:var(--ink);flex:1 1 100%;font-size:1.1rem;padding:15px}
+.btn.h{color:var(--head)} .btn.t{color:var(--tail)}
+.btn.sm{padding:9px 12px;font-size:.9rem}
+.row{display:flex;gap:8px;flex:1 1 100%}
+.row .btn{flex:1}
+
+.toggle{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:6px}
+.toggle button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:500 .9rem Rubik,sans-serif;color:var(--soft);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--seam);color:#16203F}
+.hint{font-size:.85rem;color:var(--soft);margin:0 0 14px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--paper);border:0;border-radius:99px;padding:5px 12px;font:500 .85rem Rubik,sans-serif;margin-bottom:12px;cursor:pointer}
+
+h2{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:1.3rem;margin:30px 0 10px}
+.favs{list-style:none;margin:0;padding:0}
+.favs li{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);font-family:"Young Serif",Georgia,serif;font-size:1.05rem}
+.favs li span{flex:1}
+.favs .x{border:0;background:none;color:var(--soft);font-size:1.1rem;cursor:pointer;padding:2px 6px}
+.empty{color:var(--soft);font-size:.95rem}
+
+.intro{font-size:1rem;margin:0 0 10px}
+.legend{display:flex;gap:8px;margin:10px 0 6px;flex-wrap:wrap}
+.legend span{padding:6px 12px;border-radius:8px;font-weight:500;font-size:.9rem}
+.legend .lh{background:var(--headbg);color:var(--head)} .legend .lt{background:var(--tailbg);color:var(--tail)}
+.big{font-family:"Young Serif",Georgia,serif;font-size:1.15rem;margin:18px 0 6px}
+.fam{border-top:1px solid var(--line);padding:14px 0}
+.fam-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.fam-name{font-family:"Young Serif",Georgia,serif;font-size:1.15rem}
+.fam-n{font-size:.85rem;color:var(--soft)}
+.bar{height:8px;background:var(--line);border-radius:4px;margin:8px 0;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--head) 0 50%,var(--seam) 50%)}
+.ex{font-size:.9rem;margin:0 0 8px}
+.ex .eh{color:var(--head)} .ex .et{color:var(--tail)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:14px;max-width:calc(100% - 32px);text-align:center;font-weight:500;transition:transform .25s;pointer-events:none}
+.toast.on{transform:translateX(-50%) translateY(0)}
+#fams h3{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:1.4rem;margin:28px 0 6px}
+#fams h3 small{font-family:Rubik,sans-serif;font-size:.85rem;color:var(--soft)}
+.origin small{color:var(--soft)}
+.btn:disabled{opacity:.4;cursor:default}
+.tabs button{padding:10px 2px;font-size:.85rem}
+.foot{font-size:.82rem;color:var(--soft);padding:10px 22px 14px;border-top:1px solid var(--line)}
+#randVote{display:inline-flex}
+.vote{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:99px;padding:8px 14px;font:500 1rem Rubik,sans-serif;cursor:pointer;white-space:nowrap}
+.vote[aria-pressed="true"]{background:#E0365A;border-color:#E0365A;color:#fff}
+.vote b{font-weight:500}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+ol.list{counter-reset:n}
+ol.list li:not(.empty)::before{counter-increment:n;content:counter(n);font-family:"Young Serif",Georgia,serif;color:var(--soft);min-width:1.4em}
+.list .rt{flex:1;font-family:"Young Serif",Georgia,serif;font-size:1.02rem;line-height:1.35}
+.list .rt small{display:block;font-family:Rubik,sans-serif;font-size:.78rem;color:var(--soft);margin-top:3px}
+.eh{color:var(--head)} .et{color:var(--tail)}
+.st{font-size:.78rem;font-weight:500;padding:4px 10px;border-radius:99px;background:var(--line)}
+.st.ok{background:#1E9E62;color:#fff} .st.no{background:#B33A3A;color:#fff}
+.modbtns{display:flex;gap:6px;flex-wrap:wrap}
+.btn.ok{background:#1E9E62;color:#fff;border-color:#1E9E62}
+.form{display:flex;flex-direction:column;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px}
+.form label{display:flex;flex-direction:column;gap:6px;font-size:.88rem;font-weight:500;color:var(--soft)}
+.form input,.form select{font:400 1.05rem Rubik,sans-serif;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.form .lh2 input{border-left:5px solid var(--head)} .form .lt2 input{border-left:5px solid var(--seam)}
+.form .hint{margin:-6px 0 0}
+.prev{background:var(--bg);border-radius:10px;padding:10px 12px}
+.prev small{color:var(--soft)} .prev p{margin:4px 0 0;font-family:"Young Serif",Georgia,serif;font-size:1.15rem}
+.err{color:#C0392B;font-weight:500;margin:0;min-height:1em}
+.note{background:var(--tailbg);color:var(--ink);padding:12px 14px;border-radius:12px}
+.form textarea{font:400 1rem Rubik,sans-serif;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;resize:vertical}
+.chk{flex-direction:row!important;align-items:center;gap:10px!important;color:var(--ink)!important;font-size:.95rem!important}
+.chk input{width:22px;height:22px;accent-color:var(--head);flex:none}
+.sim{background:var(--headbg);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.sim b{font-family:"Young Serif",Georgia,serif;font-weight:400;color:var(--head)}
+.sim small{display:block;color:var(--soft);margin-top:4px}
+.mod{flex-direction:column;align-items:stretch!important}
+.mod input,.mod textarea{font:400 .95rem Rubik,sans-serif;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.mod .row2{display:flex;gap:6px}
+.mod .row2 input:first-child{border-left:4px solid var(--head)} .mod .row2 input:last-child{border-left:4px solid var(--seam)}
+.mod small{color:var(--soft);font-size:.8rem}
+.x2{border:0;background:none;color:var(--soft);cursor:pointer;font-size:1rem;padding:4px 8px}
+.search{font:400 1.05rem Rubik,sans-serif;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);width:100%;margin-bottom:6px}
+.tag.today{color:var(--tail);font-weight:700}
+mark{background:var(--seam);color:#16203F;border-radius:3px;padding:0 2px}
+.adm{margin-top:36px;color:var(--soft);font-size:.9rem}
+.adm summary{cursor:pointer;padding:6px 0}
+.adm .form{margin-top:10px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>Refrank</span><em>enstein</em></h1>
+    <div class="flags" role="group" aria-label="Idioma">
+      <button data-lang="gl" title="Galego"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><path d="M-1 -1 L31 21" stroke="#0099CC" stroke-width="5"/></svg></button>
+      <button data-lang="ca" title="Català"><svg viewBox="0 0 30 18"><rect width="30" height="18" fill="#FCDD09"/><g fill="#DA121A"><rect y="2" width="30" height="2"/><rect y="6" width="30" height="2"/><rect y="10" width="30" height="2"/><rect y="14" width="30" height="2"/></g></svg></button>
+      <button data-lang="eu" title="Euskara"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#D52B1E"/><path d="M0 0L30 20M30 0L0 20" stroke="#009B48" stroke-width="3"/><path d="M15 0V20M0 10H30" stroke="#fff" stroke-width="3"/></svg></button>
+      <button data-lang="es" title="Castellano"><svg viewBox="0 0 30 20"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg></button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="rand" data-i="random"></button>
+    <button role="tab" data-tab="mix" data-i="mix"></button>
+    <button role="tab" data-tab="top" data-i="top"></button>
+    <button role="tab" data-tab="ana" data-i="anatomy"></button>
+  </nav>
+
+  <!-- ALEATORIO -->
+  <section id="rand">
+    <div class="card" id="randCard"></div>
+    <div class="actions">
+      <button class="btn main" id="randBtn" data-i="another"></button>
+      <button class="btn sm" id="randBack" data-i="back"></button>
+      <button class="btn sm" id="randCopy" data-i="share"></button>
+      <span id="randVote"></span>
+    </div>
+  </section>
+
+  <!-- MESTURA -->
+  <section id="mix" hidden>
+    <div class="toggle" role="group">
+      <button data-mode="coh" data-i="coherent"></button>
+      <button data-mode="chaos" data-i="chaos"></button>
+    </div>
+    <p class="hint" id="modeHint"></p>
+    <button class="chip" id="famChip" hidden></button>
+    <div class="card" id="mixCard"></div>
+    <div class="actions">
+      <button class="btn main" id="mixBtn" data-i="shuffle"></button>
+      <div class="row">
+        <button class="btn h sm" id="swapH" data-i="first"></button>
+        <button class="btn t sm" id="swapT" data-i="second"></button>
+      </div>
+      <button class="btn sm" id="mixBack" data-i="back"></button>
+      <button class="btn sm" id="mixSave" data-i="save"></button>
+      <button class="btn sm" id="mixCopy" data-i="share"></button>
+    </div>
+    <h2 data-i="saved"></h2>
+    <ul class="favs" id="favs"></ul>
+  </section>
+
+  <!-- TOP -->
+  <section id="top" hidden>
+    <input class="search" id="q" type="search" data-ph="searchPh" autocomplete="off">
+    <p class="hint" id="qCount"></p>
+    <ul class="list" id="qList"></ul>
+    <h2 data-i="topTitle"></h2>
+    <ol class="list" id="topList"></ol>
+  </section>
+
+  <!-- ANATOMÍA -->
+  <section id="ana" hidden>
+    <p class="intro" data-i="intro"></p>
+    <div class="legend"><span class="lh" data-i="head"></span><span class="lt" data-i="tail"></span></div>
+    <p class="big" id="combos"></p>
+    <div id="fams"></div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- REFRANES ----------
+   Formato: cabeza| cola  (la coma antes de "|" indica que la cola se une con coma)
+   Familias: q=Quien… m=Más… que… a=A… n=No… c=Cuando… d=Donde… e=De… en=En… g=libres */
+const DATA = `
+#q
+Quien madruga,| Dios le ayuda
+Quien mucho abarca,| poco aprieta
+Quien a buen árbol se arrima,| buena sombra le cobija
+Quien siembra vientos,| recoge tempestades
+Quien calla,| otorga
+Quien ríe el último,| ríe mejor
+Quien bien te quiere,| te hará llorar
+Quien no llora,| no mama
+Quien tiene un amigo,| tiene un tesoro
+Quien guarda,| halla
+Quien con niños se acuesta,| mojado se levanta
+Quien la sigue,| la consigue
+Quien busca,| encuentra
+Quien fue a Sevilla,| perdió su silla
+Quien avisa,| no es traidor
+Quien tiene boca,| se equivoca
+Quien roba a un ladrón,| tiene cien años de perdón
+Quien mal anda,| mal acaba
+Quien no se arriesga,| no cruza el río
+Quien espera,| desespera
+Quien parte y reparte,| se queda con la mejor parte
+Quien da primero,| da dos veces
+Quien se pica,| ajos come
+Quien mucho habla,| mucho yerra
+Quien hace la ley,| hace la trampa
+Quien no tiene cabeza,| tiene que tener pies
+Quien canta,| su mal espanta
+Quien con lobos anda,| a aullar se enseña
+Quien escupe al cielo,| en la cara le cae
+Quien pregunta,| no yerra
+Quien tiene padrino,| se bautiza
+Quien juega con fuego,| se quema
+Quien a hierro mata,| a hierro muere
+Quien dice lo que quiere,| oye lo que no quiere
+Quien tuvo,| retuvo
+Quien no ha visto Sevilla,| no ha visto maravilla
+Quien no oye consejo,| no llega a viejo
+Quien bien siembra,| bien recoge
+Quien paga,| manda
+Quien tiene tienda,| que la atienda
+Quien mucho duerme,| poco aprende
+Quien adelante no mira,| atrás se queda
+Quien bien ata,| bien desata
+#m
+Más vale pájaro en mano| que ciento volando
+Más vale tarde| que nunca
+Más vale prevenir| que curar
+Más vale solo| que mal acompañado
+Más vale maña| que fuerza
+Más vale ponerse una vez colorado| que ciento amarillo
+Más vale ser cabeza de ratón| que cola de león
+Más vale lo malo conocido| que lo bueno por conocer
+Más vale caer en gracia| que ser gracioso
+Más vale un toma| que dos te daré
+Más sabe el diablo por viejo| que por diablo
+Más vale honra sin barcos| que barcos sin honra
+Más vale llegar a tiempo| que rondar un año
+Más vale callar| que mal hablar
+Más ven cuatro ojos| que dos
+Más vale paso que dure| que trote que canse
+Más vale amigo en la plaza| que dinero en el arca
+Más vale algo| que nada
+Más vale una imagen| que mil palabras
+Más es el ruido| que las nueces
+Más largo| que un día sin pan
+Más contento| que unas castañuelas
+Más feo| que pegarle a un padre
+Más perdido| que un pulpo en un garaje
+Más listo| que el hambre
+Más viejo| que Matusalén
+Más pesado| que una vaca en brazos
+Más corto| que las mangas de un chaleco
+Más sordo| que una tapia
+Más claro| que el agua
+Más tieso| que un ajo
+Más fresco| que una lechuga
+Más vago| que la chaqueta de un guardia
+Más raro| que un perro verde
+Es peor el remedio| que la enfermedad
+Hay más días| que longanizas
+No hay peor ciego| que el que no quiere ver
+No hay peor sordo| que el que no quiere oír
+No es lo mismo predicar| que dar trigo
+Antes se coge al mentiroso| que al cojo
+#a
+A caballo regalado,| no le mires el diente
+A palabras necias,| oídos sordos
+A buen entendedor,| pocas palabras bastan
+A falta de pan,| buenas son tortas
+A mal tiempo,| buena cara
+A rey muerto,| rey puesto
+A cada cerdo| le llega su San Martín
+A otro perro| con ese hueso
+A lo hecho,| pecho
+A la tercera| va la vencida
+A quien Dios se la dé,| San Pedro se la bendiga
+A Dios rogando| y con el mazo dando
+A buenas horas,| mangas verdes
+A grandes males,| grandes remedios
+A río revuelto,| ganancia de pescadores
+A perro flaco,| todo son pulgas
+A gato viejo,| rata tierna
+A la fuerza| ahorcan
+A mucha hambre,| no hay pan duro
+A enemigo que huye,| puente de plata
+A cada pajarillo| le gusta su nidillo
+Al mejor cazador| se le va la liebre
+Al buen pagador| no le duelen prendas
+Al que le pique,| que se rasque
+Al que no quiere caldo,| taza y media
+Al mal paso,| darle prisa
+Al pan, pan,| y al vino, vino
+Al freír| será el reír
+A buen hambre| no hay pan duro
+#n
+No por mucho madrugar| amanece más temprano
+No hay mal| que por bien no venga
+No hay dos| sin tres
+No hay mal| que cien años dure
+No es oro| todo lo que reluce
+No dejes para mañana| lo que puedas hacer hoy
+No se ganó Zamora| en una hora
+No hay rosa| sin espinas
+No todo el monte| es orégano
+No se puede repicar| y andar en la procesión
+No hay que vender la piel del oso| antes de cazarlo
+No se hizo la miel| para la boca del asno
+No es tan fiero el león| como lo pintan
+No hay atajo| sin trabajo
+No hay que buscarle tres pies| al gato
+No hay cosa escondida| que tarde o temprano no sea sabida
+No se acuerda el cura| de cuando fue sacristán
+No hay bien| que dure ni mal que no se acabe
+Nunca es tarde| si la dicha es buena
+Nunca digas| de esta agua no beberé
+Nunca llueve| a gusto de todos
+#c
+Cuando el río suena,| agua lleva
+Cuando las barbas de tu vecino veas pelar,| pon las tuyas a remojar
+Cuando el gato no está,| los ratones bailan
+Cuando una puerta se cierra,| otra se abre
+Cuando a Roma fueres,| haz lo que vieres
+Cuando el diablo no tiene qué hacer,| mata moscas con el rabo
+Cuando marzo mayea,| mayo marcea
+Cuando el hambre entra por la puerta,| el amor sale por la ventana
+Cuando no hay lomo,| de todo como
+Cuando la pobreza entra por la puerta,| la honra salta por la ventana
+Cuando seas padre,| comerás huevos
+Cuando el grajo vuela bajo,| hace un frío del carajo
+#d
+Donde las dan,| las toman
+Donde fueres,| haz lo que vieres
+Donde hay patrón,| no manda marinero
+Donde comen dos,| comen tres
+Donde menos se espera,| salta la liebre
+Donde hubo fuego,| cenizas quedan
+Donde no hay harina,| todo es mohína
+Donde hay confianza,| da asco
+Donde manda capitán,| no manda marinero
+#e
+De tal palo,| tal astilla
+De noche,| todos los gatos son pardos
+Del dicho al hecho| hay mucho trecho
+De casta le viene al galgo| ser rabilargo
+De los escarmentados| nacen los avisados
+De grandes cenas| están las sepulturas llenas
+De la discusión| nace la luz
+De perdidos,| al río
+Del árbol caído| todos hacen leña
+De bien nacido| es ser agradecido
+De ilusión| también se vive
+De músico, poeta y loco,| todos tenemos un poco
+De Madrid| al cielo
+Del agua mansa| líbreme Dios
+De lo contado| come el lobo
+De sabios| es mudar de opinión
+#en
+En casa del herrero,| cuchillo de palo
+En boca cerrada| no entran moscas
+En abril,| aguas mil
+En el término medio| está la virtud
+En la variedad| está el gusto
+En martes,| ni te cases ni te embarques
+En tierra de ciegos,| el tuerto es rey
+En la guerra y en el amor| todo vale
+En todas partes| cuecen habas
+En la confianza| está el peligro
+En el pecado| va la penitencia
+En casa de gaitero,| todos son danzantes
+En mayo,| hasta el cuarenta no te quites el sayo
+#g
+Perro ladrador,| poco mordedor
+Perro que ladra| no muerde
+Camarón que se duerme,| se lo lleva la corriente
+Agua que no has de beber,| déjala correr
+Dime con quién andas| y te diré quién eres
+Ojos que no ven,| corazón que no siente
+Cría cuervos| y te sacarán los ojos
+Genio y figura,| hasta la sepultura
+Hierba mala| nunca muere
+Las apariencias| engañan
+Los niños y los borrachos| siempre dicen la verdad
+El que la hace| la paga
+El hábito| no hace al monje
+Zapatero,| a tus zapatos
+Ojo por ojo,| diente por diente
+Año de nieves,| año de bienes
+Mal de muchos,| consuelo de tontos
+Cada loco| con su tema
+El saber| no ocupa lugar
+Haz el bien| y no mires a quién
+Piensa mal| y acertarás
+Poco a poco| se va lejos
+Dios los cría| y ellos se juntan
+Ande yo caliente| y ríase la gente
+Gato escaldado| del agua fría huye
+Muerto el perro,| se acabó la rabia
+Hecha la ley,| hecha la trampa
+Sobre gustos| no hay nada escrito
+Una golondrina| no hace verano
+Los últimos| serán los primeros
+Las cuentas claras| y el chocolate espeso
+Tanto va el cántaro a la fuente| que al final se rompe
+Lo que no mata,| engorda
+Cada oveja| con su pareja
+Aunque la mona se vista de seda,| mona se queda
+Barriga llena,| corazón contento
+Hombre prevenido| vale por dos
+Mucho ruido| y pocas nueces
+Cuanto más tienes,| más quieres
+Las palabras| se las lleva el viento
+Arrieros somos| y en el camino nos encontraremos
+Contigo pan| y cebolla
+Mañana será| otro día
+El tiempo| lo cura todo
+La avaricia| rompe el saco
+La curiosidad| mató al gato
+El roce| hace el cariño
+El que algo quiere,| algo le cuesta
+Las desgracias| nunca vienen solas
+Agua pasada| no mueve molino
+Cría fama| y échate a dormir
+Hoy por ti,| mañana por mí
+Ver| para creer
+Cada maestrillo| tiene su librillo
+Dando y dando,| pajarito volando
+Ojos vemos,| corazones no sabemos
+Puerta abierta,| al santo tienta
+Buey solo| bien se lame
+Gallina vieja| hace buen caldo
+Lo cortés| no quita lo valiente
+Sarna con gusto| no pica
+Tras la tempestad| viene la calma
+Obras son amores,| que no buenas razones
+Bicho malo| nunca muere
+Una de cal| y otra de arena
+Las cosas de palacio| van despacio
+Matar dos pájaros| de un tiro
+Caras vemos,| corazones no sabemos
+Juntos pero no revueltos,| que cada uno es cada uno
+El muerto al hoyo| y el vivo al bollo
+Torres más altas| han caído
+Afortunado en el juego,| desgraciado en amores
+Febrerillo el loco| saca a su hermano del soto
+Las penas con pan| son menos
+Unos cardan la lana| y otros llevan la fama
+Gato con guantes| no caza ratones
+Echar margaritas| a los cerdos
+Tanto tienes,| tanto vales
+Ni pidas a quien pidió| ni sirvas a quien sirvió
+#q
+Quien mucho corre,| pronto para
+Quien mucho se agacha,| el culo enseña
+Quien a dos señores sirve,| con alguno queda mal
+Quien quiera peces,| que se moje
+Quien a los suyos se parece,| honra merece
+Quien hace un cesto,| hace ciento
+Quien no tiene vergüenza,| todo el campo es suyo
+#m
+Más vale perder un minuto en la vida| que la vida en un minuto
+Más vale saber| que haber
+Más hace el que quiere| que el que puede
+Más lento| que el caballo del malo
+Más agarrado| que un chotis
+Más pobre| que las ratas
+Más vale tener| que desear
+#a
+A cada santo| le llega su función
+A Dios lo que es de Dios| y al César lo que es del César
+A otra cosa,| mariposa
+Al enemigo,| ni agua
+Al hierro caliente,| batir de repente
+#c
+Cuando Dios no quiere,| los santos no pueden
+Cuando el pobre lava,| llueve
+#en
+En el pedir| no hay engaño
+En la mesa y en el juego| se conoce al caballero
+En boca del mentiroso,| lo cierto se hace dudoso
+#g
+Unos nacen con estrella| y otros estrellados
+Nadie es profeta| en su tierra
+Cada uno en su casa| y Dios en la de todos
+Entre col y col,| lechuga
+Lo que se aprende en la cuna| siempre dura
+Las paredes| oyen
+Pájaro que comió,| voló
+Tras cornudo,| apaleado
+Vísteme despacio,| que tengo prisa
+Ni tanto| ni tan calvo
+Vivir para| ver
+Marzo ventoso y abril lluvioso| sacan a mayo florido y hermoso
+Agosto y septiembre| no duran siempre
+#q
+Quien tiene hambre,| con pan sueña
+Quien con perros se acuesta,| con pulgas se levanta
+Quien no sabe| es como quien no ve
+#m
+Más vale buena fama| que cama dorada
+No hay mejor salsa| que el hambre
+#a
+A cada uno| lo suyo
+Al buen callar| llaman Sancho
+A la vejez,| viruelas
+A buen sueño| no hay mala cama
+#c
+Cuando la limosna es grande,| hasta el santo desconfía
+#g
+El pez grande| se come al chico
+Agua de mayo,| pan para todo el año
+La ocasión| hace al ladrón
+Bien está| lo que bien acaba
+La esperanza| es lo último que se pierde
+Cada cosa| a su tiempo
+Lo bueno, si breve,| dos veces bueno
+#q
+Quien busca el peligro,| perece en él
+Quien te da un hueso,| no te querría ver muerto
+Quien tiene un tío en Alcalá,| ni tiene tío ni tiene ná
+Quien no tiene suegra ni cuñado,| es bienaventurado
+Quien regala bien vende,| si el que recibe lo entiende
+Quien siembra abrojos,| no ande descalzo
+Quien bien tiene y mal escoge,| del mal que le venga no se enoje
+#m
+Más vale ser envidiado| que compadecido
+Más vale vergüenza en cara| que mancilla en corazón
+Más vale buen nombre| que muchas riquezas
+Más da el duro| que el desnudo
+Más cerca están mis dientes| que mis parientes
+Más moscas se cazan con miel| que con hiel
+Más tonto| que Abundio
+Más sabe el loco en su casa| que el cuerdo en la ajena
+Más mató la cena| que sanó Avicena
+No hay mayor desprecio| que no hacer aprecio
+#a
+A buen gato,| buen rato
+A la cama no te irás| sin saber una cosa más
+Al ojo del amo| engorda el caballo
+Al hombre osado,| la fortuna le da la mano
+Al pobre y al feo,| todo se le va en deseo
+A más moros,| más ganancia
+A quien cuece y amasa,| no le hurtes hogaza
+A carne de lobo,| diente de perro
+A los tontos| no les dura el dinero
+#n
+No hay plazo que no se cumpla| ni deuda que no se pague
+No hay que mentar la soga| en casa del ahorcado
+No se puede estar| en misa y repicando
+Nunca segundas partes| fueron buenas
+Nunca falta un roto| para un descosido
+No se cogen truchas| a bragas enjutas
+#c
+Cuando el sabio señala la luna,| el necio mira el dedo
+Cuando no está preso,| lo andan buscando
+#d
+Donde no hay mata,| no hay patata
+¿Dónde va Vicente?| Donde va la gente
+Donde dije digo,| digo Diego
+#e
+De buenas intenciones| está empedrado el infierno
+De los cuarenta para arriba,| no te mojes la barriga
+De Guatemala| a Guatepeor
+De hombres es errar,| de bestias perseverar en el error
+De padres gatos,| hijos michos
+De la abundancia del corazón| habla la boca
+#en
+En tiempo de higos,| no hay amigos
+En casa del pobre,| poco dura la alegría
+En la cama y en la cárcel| se conocen los amigos
+En febrero,| busca la sombra el perro
+En cada tierra,| su uso
+#g
+Haz lo que digo| y no lo que hago
+Querer| es poder
+Por la boca| muere el pez
+Por el humo| se sabe dónde está el fuego
+Lo prometido| es deuda
+Amor con amor| se paga
+Año bisiesto,| año siniestro
+Bien vengas, mal,| si vienes solo
+Casa con dos puertas| mala es de guardar
+Comer y rascar,| todo es empezar
+Dios aprieta| pero no ahoga
+Dinero llama| a dinero
+El casado| casa quiere
+El hambre| agudiza el ingenio
+El movimiento| se demuestra andando
+El tiempo| es oro
+Hablando| se entiende la gente
+La cabra| siempre tira al monte
+La letra| con sangre entra
+La práctica| hace al maestro
+Lo que mal empieza| mal acaba
+Manos frías,| corazón caliente
+Mientras hay vida,| hay esperanza
+Oveja que bala,| bocado que pierde
+Pan para hoy| y hambre para mañana
+Perro no come| carne de perro
+Por San Blas,| la cigüeña verás
+Por San Antón,| gallinita pon
+Por los Santos,| nieve en los altos
+Reunión de pastores,| oveja muerta
+Sobre el muerto,| las coronas
+Todos los caminos| llevan a Roma
+Viento y ventura| poco dura
+Ajo, cebolla y limón,| y déjate de inyección
+Del plato a la boca| se cae la sopa
+Las mentiras| tienen las patas muy cortas
+Poderoso caballero| es don Dinero
+Si la montaña no va a Mahoma,| Mahoma va a la montaña
+Si te he visto,| no me acuerdo
+Una vez al año| no hace daño
+La ignorancia| es muy atrevida
+La alabanza propia| envilece
+#q
+Quien mucho promete,| poco cumple
+#m
+Más vale un hoy| que dos mañanas
+Más vale doblar| que quebrar
+#g
+Hijo de gato,| caza ratones
+Lo que bien empieza,| bien acaba
+@gl
+#q
+Quen non chora,| non mama
+Quen garda,| ten
+Quen ten un amigo,| ten un tesouro
+Quen non arrisca,| non pasa o río
+Quen madruga,| Deus o axuda
+Quen canta,| os seus males espanta
+Quen fala,| paga
+#m
+Máis vale paxaro na man| ca cen voando
+Máis vale saber| ca ter
+Máis vale tarde| ca nunca
+Máis vale só| ca mal acompañado
+#a
+A quen madruga,| Deus axuda
+Ao mal tempo,| boa cara
+A cabalo regalado,| non lle mires o dente
+#n
+Non hai mal| que cen anos dure
+Non hai dous| sen tres
+Non todo o monte| é ourego
+#c
+Cando o mar bate na rocha,| quen paga é o mexillón
+Cando o río soa,| auga leva
+#e
+De noite,| todos os gatos son pardos
+De tal pau,| tal racha
+Polo San Martiño,| trompos ao camiño
+Polo San Martiño,| porco e viño
+#en
+En abril,| augas mil
+En casa de ferreiro,| espeto de pau
+Na casa do gaiteiro,| todos son bailadores
+#g
+Auga por San Xoán| tolle o viño e non dá pan
+Ano de neves,| ano de bens
+Cada un na súa casa| e Deus na de todos
+Dime con quen andas| e direiche quen es
+Can que ladra| non morde
+Moito ruído| e poucas noces
+Xente nova e leña verde,| todo é fume
+Casa sen fillos,| figueira sen figos
+Mal de moitos,| consolo de parvos
+Febreiriño corto,| cos teus días vinte e oito
+Ollos que non ven,| corazón que non sente
+Augas pasadas| non moen muíño
+Ceo empedrado,| chan mollado
+Unha andoriña| non fai verán
+Pan con pan,| comida de parvos
+Hoxe por ti,| mañá por min
+#q
+Quen moito abarca,| pouco aperta
+Quen a boa árbore se arrima,| boa sombra o cobixa
+Quen sementa ventos,| recolle tempestades
+Quen cala,| outorga
+Quen ri o último,| ri mellor
+Quen ben te quere,| farate chorar
+Quen busca,| atopa
+Quen avisa,| non é traidor
+Quen ten boca,| erra
+Quen mal anda,| mal acaba
+Quen espera,| desespera
+Quen parte e reparte,| leva a mellor parte
+Quen con nenos se deita,| mexado se ergue
+Quen vai a Sevilla,| perde a cadeira
+Quen dá primeiro,| dá dúas veces
+Quen moito fala,| moito erra
+Quen fai a lei,| fai a trampa
+Quen non ten cabeza,| ten que ter pés
+Quen con lobos anda,| a ouvear aprende
+Quen cuspe para arriba,| na cara lle cae
+Quen pregunta,| non erra
+Quen xoga co lume,| quéimase
+Quen a ferro mata,| a ferro morre
+Quen tivo,| retivo
+Quen non escoita consello,| non chega a vello
+Quen ben sementa,| ben colle
+Quen paga,| manda
+Quen ten tenda,| que a atenda
+Quen moito dorme,| pouco aprende
+Quen ten fame,| con pan soña
+Quen de mozo non traballa,| de vello dorme na palla
+Quen fía,| non cobra
+Quen boa cama fai,| nela se deita
+Quen máis ten,| máis quere
+Quen anda ao mel,| algo lle pega
+Quen se pica,| allos come
+Quen rouba a un ladrón,| ten cen anos de perdón
+Quen vai ao muíño,| enfariñase
+Quen non traballa,| non come
+Quen moito corre,| pronto para
+Quen garda cando ten,| come cando quere
+#m
+Máis vale previr| ca curar
+Máis vale maña| ca forza
+Máis vale ser cabeza de rato| ca rabo de león
+Máis vale o malo coñecido| ca o bo por coñecer
+Máis sabe o demo por vello| ca por demo
+Máis ven catro ollos| ca dous
+Máis vale algo| ca nada
+Máis vale caer en graza| ca ser gracioso
+Máis vale un toma| ca dous che darei
+Máis vale amigo na praza| ca diñeiro na caixa
+Máis vale calar| ca mal falar
+Máis vale paso que dure| ca trote que canse
+Máis vale chegar a tempo| ca rondar un ano
+É peor o remedio| ca a enfermidade
+Hai máis días| ca chourizos
+Máis longo| ca un día sen pan
+Máis contento| ca unhas castañolas
+Máis perdido| ca un polbo nun garaxe
+Máis listo| ca a fame
+Máis vello| ca Matusalén
+Máis xordo| ca unha parede
+Máis claro| ca a auga
+Máis fresco| ca unha leituga
+Máis raro| ca un can verde
+Máis fai o que quere| ca o que pode
+Máis vale bo nome| ca moitas riquezas
+Máis vale pouco e bo| ca moito e malo
+Máis vale un amigo| ca cen parentes
+Non hai peor cego| ca o que non quere ver
+Non hai peor xordo| ca o que non quere oír
+#a
+A palabras necias,| oídos xordos
+A bo entendedor,| poucas palabras bastan
+A falta de pan,| boas son tortas
+A rei morto,| rei posto
+A cada porco| chégalle o seu San Martiño
+A outro can| con ese óso
+Ao feito,| peito
+Á terceira| vai a vencida
+A Deus rogando| e co mazo dando
+A grandes males,| grandes remedios
+A río revolto,| ganancia de pescadores
+A can fraco,| todo son pulgas
+A moita fame,| non hai pan duro
+A cada paxariño| góstalle o seu niño
+Ao mellor cazador| escápaselle a lebre
+Ao que lle pique,| que se rasque
+Ao que non quere caldo,| tres cuncas
+Ao pan, pan,| e ao viño, viño
+Ao mal paso,| darlle présa
+Ao inimigo que foxe,| ponte de prata
+A voda nin a bautizo| non vaias sen ser chamado
+Á fame,| non hai pan malo
+A quen Deus lla dea,| San Pedro lla bendiga
+#n
+Non por moito madrugar| amence máis cedo
+Non hai mal| que por ben non veña
+Non é ouro| todo o que reluce
+Non deixes para mañá| o que poidas facer hoxe
+Non se ganou Zamora| nunha hora
+Non hai rosa| sen espiñas
+Non se pode repicar| e andar na procesión
+Non vendas a pel do oso| antes de cazalo
+Non é tan bravo o león| como o pintan
+Non hai atallo| sen traballo
+Non lle busques tres pés| ao gato
+Nunca é tarde| se a dita é boa
+Nunca digas| desta auga non beberei
+Nunca chove| a gusto de todos
+Non hai sábado| sen sol
+Non hai fume| sen lume
+Non hai voda sen canto| nin morte sen pranto
+#c
+Cando o gato non está,| os ratos bailan
+Cando unha porta se pecha,| outra se abre
+Cando as barbas do teu veciño vexas pelar,| pon as túas a remollar
+Cando vaias a Roma,| fai o que vexas
+Cando o demo non ten que facer,| mata moscas co rabo
+Cando marzo maiea,| maio marcea
+Cando a fame entra pola porta,| o amor sae pola fiestra
+Cando o pobre lava,| chove
+Cando Deus non quere,| os santos non poden
+Cando hai fame,| non hai pan duro
+Cando che dean o porquiño,| acode coa corda
+#e
+Do dito ao feito| hai moito treito
+De grandes ceas| están as sepulturas cheas
+Da discusión| nace a luz
+De perdidos,| ao río
+Da árbore caída| todos fan leña
+De ben nacido| é ser agradecido
+De ilusión| tamén se vive
+De músico, poeta e tolo,| todos temos un pouco
+Pola boca| morre o peixe
+Polo Nadal,| un pé de galo
+Polo San Xoán,| a sardiña molla o pan
+Polos Santos,| neve nos altos
+Por San Brais,| a cegoña verás
+#en
+Na terra dos cegos,| o torto é rei
+No medio| está a virtude
+Na variedade| está o gusto
+En martes,| nin te cases nin te embarques
+En todas partes| cocen fabas
+Na confianza| está o perigo
+En boca pechada| non entran moscas
+No pedir| non hai engano
+Na guerra e no amor| todo vale
+Na mesa e no xogo| coñécese ao cabaleiro
+#g
+Ollo por ollo,| dente por dente
+O hábito| non fai ao monxe
+Zapateiro,| aos teus zapatos
+Cada tolo| co seu tema
+O saber| non ocupa lugar
+Fai o ben| e non mires a quen
+Pensa mal| e acertarás
+Pouco a pouco| vaise lonxe
+Deus os cría| e eles xúntanse
+Ande eu quente| e ríase a xente
+Gato escaldado| da auga fría foxe
+Morto o can,| acabouse a rabia
+Sobre gustos| non hai nada escrito
+Os últimos| serán os primeiros
+As contas claras| e o chocolate espeso
+Tanto vai o cántaro á fonte| que ao final rompe
+O que non mata,| engorda
+Cada ovella| coa súa parella
+Aínda que a mona se vista de seda,| mona queda
+Barriga chea,| corazón contento
+Home previdente| vale por dous
+Canto máis tes,| máis queres
+As palabras| lévaas o vento
+Arrieiros somos| e no camiño atoparémonos
+Mañá será| outro día
+O tempo| todo o cura
+A avaricia| rompe o saco
+A curiosidade| matou o gato
+O roce| fai o cariño
+O que algo quere,| algo lle custa
+As desgrazas| nunca veñen soas
+Cría fama| e déitate a durmir
+Ver| para crer
+Cada mestriño| ten o seu libriño
+Ollos vemos,| corazóns non sabemos
+Herba ruín| nunca morre
+Bicho malo| nunca morre
+Tras a tempestade| vén a calma
+Unha de cal| e outra de area
+Galiña vella| fai bo caldo
+Can ladrador,| pouco mordedor
+Camarón que dorme,| lévao a corrente
+Auga que non has de beber,| déixaa correr
+Cría corvos| e sacarante os ollos
+Xenio e figura| ata a sepultura
+O que a fai| págaa
+Cada un sabe| onde lle aperta o zapato
+O mellor xastre| deixa un burato
+Boi vello,| rego dereito
+Vaca que moito berra| pouco leite dá
+Ovella que berra,| bocado que perde
+Ninguén é profeta| na súa terra
+Entre col e col,| leituga
+As paredes| oen
+Paxaro que comeu,| voou
+Vísteme amodo,| que teño présa
+Nin tanto| nin tan calvo
+Xaneiro xeadeiro,| febreiro chuvieiro
+Marzo,| iguarzo
+Marzo ventoso e abril chuvioso| fan a maio florido e fermoso
+Agosto,| frío no rostro
+Antes de que cases,| mira o que fas
+Fillo de gato| ratos mata
+O peixe grande| come ao pequeno
+Augas de maio,| pan para todo o ano
+Lúa de outubro,| sete lúas cobre
+Ata o corenta de maio| non quites o saio
+Hoxe por ti,| mañá por min
+#m
+Non hai mellor salsa| ca a fame
+Máis vale boa fama| ca cama dourada
+#a
+A cada un| o seu
+Ao bo calar| chaman Sancho
+A bo sono| non hai mala cama
+#c
+Cando a esmola é grande,| ata o santo desconfía
+#g
+Ben está| o que ben acaba
+A esperanza| é o último que se perde
+A ocasión| fai o ladrón
+Cada cousa| ao seu tempo
+O bo, se breve,| dúas veces bo
+Mentres hai vida,| hai esperanza
+#q
+Quen ten vergonza,| nin come nin almorza
+Quen moito se baixa,| o cu ensina
+Quen dá o que ten,| non está obrigado a máis
+Quen ten tellado de vidro,| non tire pedras ao do veciño
+Quen dá pan a can alleo,| perde o pan e perde o can
+#m
+Máis vale un hoxe| ca dous mañás
+Máis vale dobrar| ca crebar
+Máis moscas se collen con mel| ca con fel
+Máis preto están os dentes| ca os parentes
+Máis sabe o tolo na súa casa| ca o cordo na allea
+Máis vale vergonza na cara| ca dor no corazón
+Máis vale ser envexado| ca compadecido
+Máis vale pan duro| ca ningún
+Non hai mellor espello| ca o amigo vello
+Non hai peor desprezo| ca non facer aprezo
+#a
+Ao ollo do amo| engorda o cabalo
+A carne de lobo,| dente de can
+Á cama non irás| sen saber unha cousa máis
+Ao home ousado,| a fortuna dálle a man
+A bo gato,| bo rato
+A quen coce e amasa,| non lle furtes fogaza
+Ao pobre e ao feo,| todo se lle vai en desexo
+#n
+Non hai prazo que non se cumpra| nin débeda que non se pague
+Non hai que mentar a corda| na casa do enforcado
+Nunca segundas partes| foron boas
+Nunca falta un roto| para un descosido
+Non se collen troitas| a bragas enxoitas
+#c
+Cando o sabio sinala a lúa,| o parvo mira o dedo
+#e
+De boas intencións| está o inferno cheo
+De tal pai,| tal fillo
+Da abundancia do corazón| fala a boca
+Polo San Andrés,| a neve nos pés
+#en
+En tempo de figos,| non hai amigos
+Na cama e no cárcere| coñécense os amigos
+En cada terra,| o seu uso
+Na casa do pobre,| pouco dura a alegría
+#g
+Fai o que digo| e non o que fago
+Querer| é poder
+Polo fume| sábese onde está o lume
+O prometido| é débeda
+Amor con amor| págase
+Ano bisesto,| ano sinistro
+Deus aperta| pero non afoga
+Diñeiro chama| a diñeiro
+O casado| casa quere
+A fame| aguza o enxeño
+O movemento| demóstrase andando
+O tempo| é ouro
+Falando| enténdese a xente
+A cabra| sempre tira ao monte
+A práctica| fai o mestre
+O que mal empeza| mal acaba
+Mans frías,| corazón quente
+Pan para hoxe| e fame para mañá
+Can non come| carne de can
+Xuntanza de pastores,| ovella morta
+Todos os camiños| levan a Roma
+Vento e ventura| pouco dura
+Do prato á boca| cae a sopa
+As mentiras| teñen as patas curtas
+Poderoso cabaleiro| é don Diñeiro
+Unha vez ao ano| non fai dano
+Mal vai a casa| onde a galiña canta e o galo cala
+Moita palla| e pouco gran
+Tanto tes,| tanto vales
+Sarna con gusto| non proe
+Xuño,| fouce no puño
+Maio pardo,| ano farto
+#q
+Quen non come cando ten,| non come cando quere
+Quen ten cu,| ten medo
+#g
+Can vello| non ladra en vano
+@ca
+#q
+Qui dia passa,| any empeny
+Qui no plora,| no mama
+Qui matina,| fa farina
+Qui la fa,| la paga
+Qui avisa,| no és traïdor
+Qui té boca,| s'equivoca
+Qui sembra vents,| recull tempestats
+Qui molt abraça,| poc estreny
+Qui no s'arrisca,| no pisca
+Qui canta,| els seus mals espanta
+Qui no té feina,| el gat pentina
+Qui no vulgui pols,| que no vagi a l'era
+#m
+Més val un boig conegut| que un savi per conèixer
+Més val tard| que mai
+Més val sol| que mal acompanyat
+Més val un ocell a la mà| que cent volant
+Val més ser cap de ratolí| que cua de lleó
+#a
+A l'abril,| cada gota val per mil
+Al juny,| la falç al puny
+A poc a poc| i bona lletra
+A casa del ferrer,| ganivet de fusta
+#c
+Quan el riu sona,| aigua porta
+Quan el gat no hi és,| les rates ballen
+#e
+De mica en mica| s'omple la pica
+De tal pal,| tal estella
+Per Sant Martí,| mata el porc i enceta el vi
+#g
+Cada terra| fa sa guerra
+Gat escaldat,| de l'aigua freda fuig
+Gos que borda| no mossega
+Ull que no veu,| cor que no sent
+Tal faràs,| tal trobaràs
+Cel rogent,| pluja o vent
+Una oreneta| no fa estiu
+Aigua passada| no mou molí
+Bon vent| i barca nova
+#q
+Qui mal fa,| mal troba
+Qui busca,| troba
+Qui calla,| atorga
+Qui riu l'últim,| riu millor
+Qui bé et vol,| et farà plorar
+Qui té un amic,| té un tresor
+Qui guarda,| troba
+Qui va a Sevilla,| perd la cadira
+Qui espera,| desespera
+Qui parteix i reparteix,| es queda la millor part
+Qui primer arriba,| primer mol
+Qui molt parla,| molt erra
+Qui fa la llei,| fa la trampa
+Qui no té cap,| ha de tenir peus
+Qui amb llops va,| a udolar aprèn
+Qui escup al cel,| a la cara li cau
+Qui pregunta,| no erra
+Qui juga amb foc,| es crema
+Qui a ferro mata,| a ferro mor
+Qui diu el que vol,| sent el que no vol
+Qui paga,| mana
+Qui té botiga,| que la guardi
+Qui de jove no treballa,| de vell dorm a la palla
+Qui té gana,| somia truites
+Qui no té un all,| té una ceba
+Qui s'excusa,| s'acusa
+Qui menja sopes,| se les pensa totes
+Qui fa el que pot,| no està obligat a més
+Qui ha begut,| beurà
+Qui té un ofici,| té un benefici
+Qui bé seu,| no es belluga
+Qui la segueix,| l'aconsegueix
+Qui no es consola| és perquè no vol
+#m
+Més val prevenir| que curar
+Més val maña| que força
+Més val dolent conegut| que bo per conèixer
+Més sap el diable per vell| que per diable
+Més hi veuen quatre ulls| que dos
+Més val alguna cosa| que res
+Més val caure en gràcia| que ser graciós
+Més val pas que duri| que trot que cansi
+Més val callar| que mal parlar
+És pitjor el remei| que la malaltia
+Hi ha més dies| que llonganisses
+Més llarg| que un dia sense pa
+Més content| que un gínjol
+Més perdut| que un pop en un garatge
+Més vell| que Matusalem
+Més vell| que l'anar a peu
+Més sord| que una tàpia
+Més clar| que l'aigua
+Més fresc| que una rosa
+Més lleig| que un pecat
+Més pesat| que el plom
+Més llest| que la gana
+Més tossut| que una mula
+Més pobre| que una rata
+Més fort| que un roure
+Més fa qui vol| que qui pot
+Més val un amic| que cent parents
+Més val poc i bo| que molt i dolent
+Val més saber| que tenir
+Una imatge val més| que mil paraules
+No hi ha pitjor sord| que el qui no vol sentir
+No hi ha pitjor cec| que el qui no vol veure
+No és el mateix predicar| que donar blat
+#a
+A cavall regalat,| no li miris el dentat
+A paraules necies,| orelles sordes
+A bon entenedor,| poques paraules basten
+A falta de pa,| bones són coques
+A mal temps,| bona cara
+A rei mort,| rei posat
+A cada porc| li arriba el seu Sant Martí
+A la tercera| va la vençuda
+A Déu pregant| i amb el mall donant
+A grans mals,| grans remeis
+A riu revolt,| guany de pescadors
+A gos magre,| tot són puces
+Al millor caçador| se li escapa la llebre
+A qui li piqui,| que es grati
+Al pa, pa,| i al vi, vi
+A l'enemic que fuig,| pont de plata
+A qui no vol caldo,| tres tasses
+A la taula i al llit,| al primer crit
+A l'estiu,| tota cuca viu
+Al maig,| cada dia un raig
+A qui Déu no dona fills,| el diable li dona nebots
+A qui matina,| Déu l'ajuda
+A boca tancada| no hi entren mosques
+#n
+No hi ha mal| que per bé no vingui
+No hi ha dos| sense tres
+No hi ha rosa| sense espines
+No és or| tot el que lluu
+No deixis per a demà| el que puguis fer avui
+No es va fer Roma| en un dia
+No és tan ferotge el lleó| com el pinten
+No venguis la pell de l'ós| abans de caçar-lo
+No diguis blat| que no sigui al sac i ben lligat
+No es pot dir mai| d'aquesta aigua no en beuré
+#c
+Quan un no vol,| dos no es barallen
+Quan la barba del teu veí vegis pelar,| posa la teva a remullar
+Quan una porta es tanca,| una altra se n'obre
+Quan a Roma vagis,| fes com veuràs
+Quan el diable no té res a fer,| amb la cua mata mosques
+Quan la fam entra per la porta,| l'amor surt per la finestra
+Quan Déu no vol,| els sants no poden
+Quan el pobre renta,| plou
+Quan plou i fa sol,| les bruixes es pentinen
+Quan siguis pare,| menjaràs ous
+#e
+Del dit al fet| hi ha un bon tret
+De nit,| tots els gats són negres
+De la discussió| neix la llum
+D'arbre caigut| tothom en fa llenya
+De bon nascut| és ser agraït
+De músic, poeta i boig,| tots en tenim un poc
+Per Nadal,| cada ovella al seu corral
+Per Sant Antoni,| un pas de dimoni
+Per Santa Llúcia,| un pas de puça
+Pel setembre,| qui tingui blat que sembri
+Per tot arreu| couen faves
+D'on no n'hi ha,| no en raja
+De fora vindran| que de casa ens trauran
+#g
+Ull per ull,| dent per dent
+L'hàbit| no fa el monjo
+Sabater,| a les teves sabates
+Cada boig| amb el seu tema
+El saber| no ocupa lloc
+Fes bé| i no miris a qui
+Pensa malament| i encertaràs
+Déu els cria| i ells s'ajunten
+Mort el gos,| morta la ràbia
+Sobre gustos| no hi ha res escrit
+Els últims| seran els primers
+Comptes clars| i xocolata espessa
+Tant va el càntir a la font| que al final es trenca
+El que no mata,| engreixa
+Encara que la mona es vesteixi de seda,| mona es queda
+Panxa plena,| cor content
+Home previngut| val per dos
+Molt soroll| i poques nous
+Les paraules| se les emporta el vent
+Demà serà| un altre dia
+El temps| tot ho cura
+L'avarícia| trenca el sac
+La curiositat| va matar el gat
+Les desgràcies| mai no vénen soles
+Cria fama| i posa't a jeure
+Avui per tu,| demà per mi
+Veure| per creure
+Mala herba| mai no mor
+Després de la tempesta| ve la calma
+Una de calç| i una altra de sorra
+Gallina vella| fa bon brou
+Cria corbs| i et trauran els ulls
+Geni i figura| fins a la sepultura
+Ningú no és profeta| a la seva terra
+Les parets| hi senten
+Vesteix-me a poc a poc,| que tinc pressa
+La feina feta| no fa destorb
+El que és bo per al fetge| és dolent per a la melsa
+Anar per llana| i tornar esquilat
+Una flor| no fa estiu
+Cadascú a casa seva| i Déu a la de tots
+Amb paciència| es guanya el cel
+L'ocasió| fa el lladre
+El peix gros| es menja el petit
+Les coses de palau| van a poc a poc
+Diners fan diners,| i polls fan polls
+Tal dia farà| un any
+Pa per avui,| fam per demà
+Amb paraules| no es fa bullir l'olla
+La pressa| no és bona consellera
+Fill de gat,| caça rates
+L'esperança| és l'últim que es perd
+Cal estar a les verdes| i a les madures
+Feta la llei,| feta la trampa
+Molta palla| i poc gra
+Tant tens,| tant vals
+Com el gos de l'hortolà,| que ni menja ni deixa menjar
+#q
+Qui dorm,| no pesca
+Qui no té memòria,| que tingui cames
+#m
+No hi ha millor salsa| que la gana
+#a
+Al bon callar| en diuen Sanç
+A cadascú| el que és seu
+#c
+Quan l'almoina és grossa,| fins el sant desconfia
+#e
+Dels escarmentats| se'n fan els savis
+#g
+Bé està| el que bé acaba
+Cada cosa| al seu temps
+Mentre hi ha vida,| hi ha esperança
+El bo, si breu,| dues vegades bo
+Aigua de maig,| pa per tot l'any
+@eu
+#m
+Hobe txori bat eskuan| ehun hegan baino
+Hobe berandu| inoiz ez baino
+#g
+Gaur niri,| bihar zuri
+Zakur zaunkaria,| gutxi hozkaria
+Zahar hitz,| zuhur hitz
+Izena duen guztia,| omen da
+Gizonak hitza,| idiak adarra
+Urrutiko intxaurrak hamalau,| hurbildu eta lau
+Zaldi emanari,| ez begiratu hortzetara
+Kalean uso,| etxean otso
+Ongi hasia,| erdi egina
+Mendiak mendia behar ez,| baina gizonak gizona bai
+#q
+Goiz jaikitzen denari,| Jainkoak laguntzen dio
+Asko besarkatzen duenak,| gutxi estutzen du
+Isilik dagoenak,| baietz dio
+Azkena barre egiten duenak,| hobeto egiten du barre
+Negar egiten ez duenak,| ez du edoskitzen
+Lagun bat duenak,| altxor bat du
+Bilatzen duenak,| aurkitzen du
+Haizea ereiten duenak,| ekaitza biltzen du
+Arriskatzen ez duenak,| ez du irabazten
+Gaizki dabilenak,| gaizki bukatzen du
+Asko hitz egiten duenak,| asko huts egiten du
+Galdetzen duenak,| ez du hutsik egiten
+Suarekin jolasten duenak,| erre egiten da
+Burdinaz hiltzen duenak,| burdinaz hiltzen da
+Nahi duena esaten duenak,| nahi ez duena entzuten du
+Ordaintzen duenak,| agintzen du
+Ondo ereiten duenak,| ondo biltzen du
+Gorde duenak,| badu
+Asko lo egiten duenak,| gutxi ikasten du
+Lehenengo ematen duenak,| bi aldiz ematen du
+Behar ez dena erosten duenak,| behar duena saldu beharko du
+Aurrera begiratzen ez duenak,| atzean geratzen da
+Lan egiten ez duenak,| ez du jaten
+Nahi duenak,| bidea aurkitzen du
+Asko dakienak,| gutxi hitz egiten du
+Lagun txarrekin dabilenak,| gaizki bukatzen du
+Pazientzia duenak,| dena lortzen du
+Erraz sinesten duenak,| erraz huts egiten du
+Gaizki egiten duenak,| gaizki aurkitzen du
+Txakurrekin oheratzen denak,| arkakusoekin jaikitzen da
+Gehiago duenak,| gehiago nahi du
+Lapurrari lapurtzen dionak,| ehun urteko barkamena du
+Ezer ez duenak,| ez du ezer galtzen
+Asko korrika egiten duenak,| laster gelditu behar du
+#m
+Hobe prebenitu| sendatu baino
+Hobe bakarrik| gaizki lagunduta baino
+Hobe trebezia| indarra baino
+Hobe zerbait| ezer ez baino
+Hobe isilik egon| gaizki hitz egin baino
+Hobe saguaren burua izan| lehoiaren buztana baino
+Hobe ezagutzen den txarra| ezagutu gabeko ona baino
+Hobe lagun bat plazan| dirua kutxan baino
+Hobe gutxi eta ona| asko eta txarra baino
+Irudi batek gehiago balio du| mila hitzek baino
+Lau begik gehiago ikusten dute| bik baino
+Deabruak gehiago daki zahar delako| deabru delako baino
+Okerragoa da sendagaia| gaixotasuna baino
+Hobe da lagun bat| ehun ahaide baino
+Hobe da izen ona| aberastasuna baino
+Ez dago itsu okerragorik| ikusi nahi ez duena baino
+Ez dago gor okerragorik| entzun nahi ez duena baino
+Bake txarra hobe| gerra ona baino
+Hobe goiz| berandu baino
+Hobe ezer ez esan| gezurra esan baino
+Buruak gehiago balio du| indarrak baino
+#k
+Nolako zura,| halako ezpala
+Nolako aita,| halako semea
+Nolako ama,| halako alaba
+Nolako bizitza,| halako heriotza
+Nolako artzaina,| halako artaldea
+Nolako maisua,| halako ikaslea
+Nolako galdera,| halako erantzuna
+Nolako ereina,| halako uzta
+Nolako lana,| halako saria
+Zer erein,| hura bildu
+Zenbat buru,| hainbat aburu
+#n
+Ez da urre| distiratzen duen guztia
+Ez dago gaitzik| onerako ez denik
+Ez dago bi| hiru gabe
+Ez utzi biharko| gaur egin dezakezuna
+Ez dago arrosarik| arantzarik gabe
+Ez saldu hartzaren larrua| ehizatu aurretik
+Ez da lanik| nekerik gabe
+Ez dago kerik| surik gabe
+Ez esan inoiz| ur honetatik ez dut edango
+Ezin da ezkila jo| eta prozesioan ibili
+Ez dago gaitzik| ehun urte irauten duenik
+#c
+Katua etxean ez dagoenean,| saguak dantzan
+Ate bat ixten denean,| beste bat irekitzen da
+Ibaiak soinua ateratzen duenean,| ura darama
+Erroman zaudenean,| egin erromatarrek bezala
+Gosea atetik sartzen denean,| maitasuna leihotik irteten da
+Auzoaren bizarra mozten ikusten duzunean,| jarri zurea bustitzen
+Jainkoak nahi ez duenean,| santuek ezin dute
+Aita izaten zarenean,| arrautzak jango dituzu
+#g
+Begia begi truk,| hortza hortz truk
+Abituak| ez du fraidea egiten
+Zapatari,| zure zapatetara
+Jakiteak| ez du lekurik hartzen
+Egin ongi,| begiratu gabe nori
+Pentsa gaizki| eta asmatuko duzu
+Poliki-poliki| urrutira iristen da
+Katu erreak| ur hotzari ere beldur
+Zakurra hil eta,| amorrua bukatu
+Gustuen gainean| ez dago ezer idatzirik
+Enara batek| ez du uda egiten
+Azkenak| lehenak izango dira
+Kontu garbiak| eta txokolate lodia
+Hiltzen ez duenak| gizentzen du
+Tximinoa zetaz jantzi arren,| tximino gelditzen da
+Sabela beteta,| bihotza pozik
+Zarata handia| eta intxaur gutxi
+Hitzak| haizeak eramaten ditu
+Bihar| beste egun bat izango da
+Denborak| dena sendatzen du
+Zikoizkeriak| zakua hausten du
+Jakin-minak| katua hil zuen
+Zoritxarrak| ez datoz inoiz bakarrik
+Ur joanak| ez du errota eragiten
+Ikusi| eta sinetsi
+Ekaitzaren ondoren| barealdia dator
+Belar txarra| ez da inoiz hiltzen
+Oilo zaharrak| salda ona
+Hazi beleak| eta begiak aterako dizkizute
+Inor ez da profeta| bere herrian
+Hormek| belarriak dituzte
+Astiro jantz nazazu,| presaka nabil eta
+Erroma ez zen| egun batean egin
+Inoiz ez da berandu| ikasteko
+Gaztetan ikasia,| zahartzaroan ez ahaztua
+Esan eta| egin
+Esku batek bestea garbitzen du,| eta biek aurpegia
+Aho itxian| ez da eulirik sartzen
+Arrain handiak| txikia jaten du
+Diruak| dirua dakar
+Osasuna,| aberastasunik handiena
+Gosea da| saltsarik onena
+Begiak ikusten ez duena,| bihotzak ez du sentitzen
+Lagun onarekin,| bidea laburra
+Zuhaitza| bere fruituez ezagutzen da
+Agindua| zor
+Eguzkia| guztiontzat ateratzen da
+Pazientziaz| dena lortzen da
+Gaitza zaldiz etorri,| eta oinez joan
+Esatea erraza,| egitea zaila
+Ardoa sartu,| zentzua irten
+Bost behatzak| ez dira berdinak
+Burua hotz| eta oinak bero
+Lehenbizi pentsatu,| gero hitz egin
+Gauaren ondoren| eguna dator
+Maiatzeko euria,| urte osoko ogia
+Elur urte,| ogi urte
+Eginez| ikasten da
+Gaizki egindako lana,| bi aldiz egina
+Denbora| urrea da
+Mila buru,| mila aburu
+Txakur zaharrak| ez du trikimailu berririk ikasten
+Ezagutu gabe,| ezin maite
+Aholkua ematea erraza,| betetzea zaila
+Bakoitzak badaki| non estutzen dion zapatak
+Asko entzun,| gutxi sinetsi
+Tantaz tanta,| harria zulatzen da
+Batasunean| dago indarra
+Lagun ona,| urrea baino hobea
+Bizi eta| bizitzen utzi
+Fedeak| mendiak mugitzen ditu
+Esana,| egina
+Beldurrak| begi handiak
+Ardoan| egia
+Haurrek eta mozkorrek| egia esaten dute
+Gauak| aholku ona ematen du
+Itxaropena| da galtzen den azkena
+Gauza bakoitzak| bere garaia
+Egia| beti azaleratzen da
+Ezkutuan dagoena,| azkenean jakingo da
+Gezurrak| hanka laburrak ditu
+Gauez| katu guztiak beltz
+#c
+Iturria lehortzen denean,| uraren balioa ezagutzen da
+Gaixotasuna datorrenean,| osasuna estimatzen da
+Ura edaten duzunean,| gogoratu iturria
+#q
+Gaztetan lan egiten ez duenak,| zahartzaroan gose
+#g
+Barrea,| osasunaren iturria
+Ura eta olioa| ez dira nahasten
+Eskua eman,| eta besoa hartu
+Begiak| arimaren ispilua
+Hitzak hitz,| egintzak egintza
+Gaurkoa gaur,| biharkoa bihar
+Bakoitza| bere etxean errege
+Guztien laguna,| inoren laguna ez
+Sua eta ura,| zerbitzari onak, nagusi txarrak
+Dirua| ez da dena
+Diruak| ez du zoriontasuna ematen
+Urrea suak probatzen du,| eta adiskidea zoritxarrak
+Benetako laguna| zoritxarrean ezagutzen da
+Hitza zilarra,| isiltasuna urrea
+Gurdi hutsak| hots handiagoa
+Gauza onak| itxaron egin behar dira
+Pausoz pauso| bidea egiten da
+#q
+Lo dagoenak| ez du arrainik harrapatzen
+#g
+Ondo dago| ondo amaitzen dena
+Bizi den artean,| itxaropena
+Ona, laburra bada,| bi aldiz ona
+Aukerak| lapurra egiten du
+Bakoitzari| berea
+Lo onari| ez dago ohe txarrik
+`;
+
+const BASE = [];
+let fam = 'g', lng = 'es';
+const seen = new Set();
+DATA.trim().split('\n').forEach(l => {
+  l = l.trim(); if (!l) return;
+  if (l[0] === '@') { lng = l.slice(1); fam = 'g'; return; }
+  if (l[0] === '#') { fam = l.slice(1); return; }
+  const [L, Rt] = l.split('|'); if (Rt === undefined) return;
+  const head = L.replace(/,\s*$/, '').trim();
+  const tail = Rt.trim();
+  const key = lng + (head + tail).toLowerCase();
+  if (seen.has(key)) return; seen.add(key);
+  BASE.push({ l: lng, f: fam, head, comma: /,\s*$/.test(L), tail });
+});
+function hash(s){ let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); }
+BASE.forEach(r => r.id = r.l + '-' + hash(r.head + '|' + r.tail));
+let COMM = [];                 // refráns achegados e aprobados
+let R = BASE.slice();
+
+const LANGS = ['es','gl','ca','eu'];
+const LNAME = { es:'Castellano', gl:'Galego', ca:'Català', eu:'Euskara' };
+const FAMS = {
+  es:[['q','Quien…, …'],['m','Más… que…'],['a','A… / Al…, …'],['n','No… / Nunca…'],['c','Cuando…, …'],['d','Donde…, …'],['e','De… / Del…, …'],['en','En…, …'],['g',null]],
+  gl:[['q','Quen…, …'],['m','Máis… ca…'],['a','A… / Ao…, …'],['n','Non…'],['c','Cando…, …'],['e','De… / Polo…, …'],['en','En… / Na…, …'],['g',null]],
+  ca:[['q','Qui…, …'],['m','Més… que…'],['a','A… / Al…, …'],['n','No…'],['c','Quan…, …'],['e','De… / Per…, …'],['g',null]],
+  eu:[['q','…-(e)nak, …'],['m','Hobe… baino'],['k','Nolako…, halako…'],['n','Ez…'],['c','…-(e)nean, …'],['g',null]]
+};
+const famName = (l, f) => { const x = (FAMS[l] || []).find(z => z[0] === f); return x && x[1] ? x[1] : T('free'); };
+/* familia automática para os refráns achegados */
+const FAM_RX = {
+  es:[['q',/^quien\b/],['m',/^m[aá]s\b/],['a',/^al?\b/],['n',/^(no|nunca)\b/],['c',/^cuando\b/],['d',/^donde\b/],['e',/^del?\b/],['en',/^en\b/]],
+  gl:[['q',/^quen\b/],['m',/^m[aá]is\b/],['a',/^(a|ao|á)\b/],['n',/^(non|nunca)\b/],['c',/^cando\b/],['e',/^(de|do|da|polo|pola|por)\b/],['en',/^(en|na|no)\b/]],
+  ca:[['q',/^qui\b/],['m',/^m[eé]s\b/],['a',/^(a|al)\b/],['n',/^no\b/],['c',/^quan\b/],['e',/^(de|del|d'|per|pel)/]],
+  eu:[['m',/^hobe\b/],['k',/^nolako\b/],['n',/^ez\b/],['c',/nean$/],['q',/(nak|nari)$/]]
+};
+function autoFam(l, head){
+  const h = head.toLowerCase();
+  for (const [f, rx] of (FAM_RX[l] || [])) if (rx.test(h)) return f;
+  return 'g';
+}
+
+/* ---------- IDIOMAS ---------- */
+const I18N = {
+  gl:{t1:'Refrank',t2:'enstein',top:'Buscar',topTitle:'Os teus refráns favoritos',noVotes:'Aínda non marcaches ningún. Dálle ao ♡ nos refráns que che gusten.',voteT:'♥',errOff:'Agora mesmo non se pode votar. Volve probar máis tarde.',adminL:'Administración',email:'Correo',pass:'Contrasinal',login:'Entrar',logout:'Saír da administración',errLogin:'Correo ou contrasinal incorrectos.',searchPh:'Buscar refráns (ex.: gato, auga…)',results:'{n} resultados',noRes:'Non hai ningún con esa palabra.',share:'Compartir',today:'Refrán do día',realNote:'Só refráns e ditos reais, dos que se din de verdade. Nada de inventos: para iso xa está a Mestura.',mean:'Que significa? (opcional)',place:'Onde se di? Vila, comarca… (opcional)',realChk:'É un refrán real que oín ou lin',errReal:'Marca a caixa para confirmar que é un refrán real.',similar:'Ollo, xa temos un parecido:',simHint:'Se é unha variante doutro sitio, podes envialo igual.',meanL:'Significado',withdraw:'Retirar',modHint:'Podes corrixir a ortografía antes de aprobar.',sendTab:'Achegar',sendTitle:'Achega o teu refrán',sendIntro:'Escribe a primeira e a segunda metade e escolle a lingua. Revísase antes de entrar no lote.',part1:'Primeira metade',part2:'Segunda metade',langL:'Lingua',alias:'O teu nome ou alcume (opcional)',send:'Enviar',sent:'Enviado! Queda pendente de revisión.',errShort:'As dúas metades teñen que ter texto (entre 2 e 80 caracteres).',errBad:'Ese texto non pasa o filtro. Proba con outras palabras.',errDup:'Ese refrán xa está no lote.',errWait:'Agarda un pouco antes de enviar outro.',errMax:'Tes demasiados refráns pendentes. Agarda a que se revisen.',errSave:'Non se puido gardar. Volve probar.',preview:'Así quedaría',commaHint:'Se a primeira metade remata en coma, escríbea.',mine:'As túas achegas',stPend:'Pendente',stOk:'Aprobado',stNo:'Rexeitado',modTitle:'Revisión (só ti)',approve:'Aprobar',reject:'Rexeitar',noPend:'Non hai nada pendente.',by:'Achegado por',anon:'Anónimo',newTitle:'Últimas achegas',noNew:'Aínda non hai achegas aprobadas nesta lingua.',back:'Volver ao anterior',random:'Azar',mix:'Mestura',anatomy:'Anatomía',another:'Outro refrán',shuffle:'Mesturar',
+      first:'Cambiar 1ª metade',second:'Cambiar 2ª metade',coherent:'Coherente',chaos:'Caos total',
+      coherentHint:'Só mestura refráns da mesma familia: soan case reais.',chaosHint:'Calquera cabeza con calquera rabo.',refsIn:'Refráns en',all:'Todas',
+      origin:'Orixe',copy:'Copiar',copied:'Copiado!',save:'Gardar',savedT:'Gardado!',saved:'As miñas mesturas',
+      empty:'Aínda non gardaches ningunha. Mestura e preme «Gardar».',free:'Libres',head:'Cabeza',tail:'Rabo',
+      intro:'Case todos os refráns teñen dúas metades: unha cabeza que plantexa e un rabo que remata. A bisagra entre elas (unha coma, un «que», un «y») é a que permite mesturalos. Agrupeinos en familias segundo como empezan: dentro da mesma familia, as metades encaixan case sempre.',
+      combos:'{n} cabezas × {n} rabos = {z} mesturas posibles',count:'{n} refráns',mixFam:'Mesturar esta familia',onlyFam:'Só'},
+  ca:{t1:'Refrank',t2:'enstein',top:'Cercar',topTitle:'Els teus refranys preferits',noVotes:'Encara no n\'has marcat cap. Prem el ♡ als refranys que t\'agradin.',voteT:'♥',errOff:'Ara mateix no es pot votar. Torna-ho a provar més tard.',adminL:'Administració',email:'Correu',pass:'Contrasenya',login:'Entrar',logout:'Sortir de l\'administració',errLogin:'Correu o contrasenya incorrectes.',searchPh:'Cerca refranys (p. ex.: gat, aigua…)',results:'{n} resultats',noRes:'No n\'hi ha cap amb aquesta paraula.',share:'Compartir',today:'Refrany del dia',realNote:'Només refranys i dites reals, dels que es diuen de veritat. Res d\'inventats: per a això ja hi ha la Barreja.',mean:'Què vol dir? (opcional)',place:'On es diu? Poble, comarca… (opcional)',realChk:'És un refrany real que he sentit o llegit',errReal:'Marca la casella per confirmar que és un refrany real.',similar:'Compte, ja en tenim un de semblant:',simHint:'Si és una variant d\'un altre lloc, el pots enviar igualment.',meanL:'Significat',withdraw:'Retirar',modHint:'Pots corregir l\'ortografia abans d\'aprovar.',sendTab:'Aportar',sendTitle:'Aporta el teu refrany',sendIntro:'Escriu la primera i la segona meitat i tria la llengua. Es revisa abans d\'entrar al lot.',part1:'Primera meitat',part2:'Segona meitat',langL:'Llengua',alias:'El teu nom o sobrenom (opcional)',send:'Enviar',sent:'Enviat! Queda pendent de revisió.',errShort:'Les dues meitats han de tenir text (entre 2 i 80 caràcters).',errBad:'Aquest text no passa el filtre. Prova amb altres paraules.',errDup:'Aquest refrany ja és al lot.',errWait:'Espera una mica abans d\'enviar-ne un altre.',errMax:'Tens massa refranys pendents. Espera que es revisin.',errSave:'No s\'ha pogut desar. Torna-ho a provar.',preview:'Així quedaria',commaHint:'Si la primera meitat acaba en coma, escriu-la.',mine:'Les teves aportacions',stPend:'Pendent',stOk:'Aprovat',stNo:'Rebutjat',modTitle:'Revisió (només tu)',approve:'Aprovar',reject:'Rebutjar',noPend:'No hi ha res pendent.',by:'Aportat per',anon:'Anònim',newTitle:'Últimes aportacions',noNew:'Encara no hi ha aportacions aprovades en aquesta llengua.',back:'Tornar a l\'anterior',random:'Atzar',mix:'Barreja',anatomy:'Anatomia',another:'Un altre refrany',shuffle:'Barrejar',
+      first:'Canviar 1a meitat',second:'Canviar 2a meitat',coherent:'Coherent',chaos:'Caos total',
+      coherentHint:'Només barreja refranys de la mateixa família: sonen gairebé reals.',chaosHint:'Qualsevol cap amb qualsevol cua.',refsIn:'Refranys en',all:'Totes',
+      origin:'Origen',copy:'Copiar',copied:'Copiat!',save:'Desar',savedT:'Desat!',saved:'Les meves barreges',
+      empty:'Encara no n\'has desat cap. Barreja i prem «Desar».',free:'Lliures',head:'Cap',tail:'Cua',
+      intro:'Gairebé tots els refranys tenen dues meitats: un cap que planteja i una cua que remata. La frontissa entre elles (una coma, un «que», una «y») és la que permet barrejar-los. Els he agrupat en famílies segons com comencen: dins la mateixa família, les meitats encaixen gairebé sempre.',
+      combos:'{n} caps × {n} cues = {z} barreges possibles',count:'{n} refranys',mixFam:'Barrejar aquesta família',onlyFam:'Només'},
+  eu:{t1:'Refrank',t2:'enstein',top:'Bilatu',topTitle:'Zure esaera gogokoenak',noVotes:'Oraindik ez duzu bat ere markatu. Sakatu ♡ gustuko dituzun esaeretan.',voteT:'♥',errOff:'Orain ezin da bozkatu. Saiatu berriro geroago.',adminL:'Administrazioa',email:'Posta',pass:'Pasahitza',login:'Sartu',logout:'Administraziotik irten',errLogin:'Posta edo pasahitz okerra.',searchPh:'Bilatu esaerak (adib.: katua, ura…)',results:'{n} emaitza',noRes:'Ez dago hitz hori duenik.',share:'Partekatu',today:'Eguneko esaera',realNote:'Benetako esaerak bakarrik, benetan esaten direnak. Asmakizunik ez: horretarako dago Nahasketa.',mean:'Zer esan nahi du? (aukerakoa)',place:'Non esaten da? Herria, eskualdea… (aukerakoa)',realChk:'Entzun edo irakurri dudan benetako esaera da',errReal:'Markatu laukia benetako esaera dela baieztatzeko.',similar:'Kontuz, antzeko bat badugu jada:',simHint:'Beste toki bateko aldaera bada, bidal dezakezu hala ere.',meanL:'Esanahia',withdraw:'Kendu',modHint:'Onartu aurretik ortografia zuzen dezakezu.',sendTab:'Ekarpena',sendTitle:'Ekarri zure esaera',sendIntro:'Idatzi lehen eta bigarren erdia eta aukeratu hizkuntza. Sortan sartu aurretik berrikusten da.',part1:'Lehen erdia',part2:'Bigarren erdia',langL:'Hizkuntza',alias:'Zure izena edo ezizena (aukerakoa)',send:'Bidali',sent:'Bidalita! Berrikusteko zain dago.',errShort:'Bi erdiek testua izan behar dute (2 eta 80 karaktere artean).',errBad:'Testu horrek ez du iragazkia gainditzen. Saiatu beste hitz batzuekin.',errDup:'Esaera hori sortan dago jada.',errWait:'Itxaron pixka bat beste bat bidali aurretik.',errMax:'Zain dauden esaera gehiegi dituzu. Itxaron berrikusi arte.',errSave:'Ezin izan da gorde. Saiatu berriro.',preview:'Honela geratuko litzateke',commaHint:'Lehen erdia komaz amaitzen bada, idatzi koma.',mine:'Zure ekarpenak',stPend:'Zain',stOk:'Onartua',stNo:'Baztertua',modTitle:'Berrikuspena (zuk bakarrik)',approve:'Onartu',reject:'Baztertu',noPend:'Ez dago ezer zain.',by:'Ekarlea:',anon:'Anonimoa',newTitle:'Azken ekarpenak',noNew:'Oraindik ez dago hizkuntza honetan onartutako ekarpenik.',back:'Aurrekora itzuli',random:'Ausaz',mix:'Nahasketa',anatomy:'Anatomia',another:'Beste esaera bat',shuffle:'Nahastu',
+      first:'Aldatu 1. erdia',second:'Aldatu 2. erdia',coherent:'Koherentea',chaos:'Kaos osoa',
+      coherentHint:'Familia bereko esaerak bakarrik nahasten ditu: ia benetakoak dirudite.',chaosHint:'Edozein buru edozein buztanekin.',refsIn:'Esaerak:',all:'Guztiak',
+      origin:'Jatorria',copy:'Kopiatu',copied:'Kopiatuta!',save:'Gorde',savedT:'Gordeta!',saved:'Nire nahasketak',
+      empty:'Oraindik ez duzu bat ere gorde. Nahastu eta sakatu «Gorde».',free:'Libreak',head:'Burua',tail:'Buztana',
+      intro:'Esaera ia guztiek bi erdi dituzte: gaia planteatzen duen burua eta borobiltzen duen buztana. Bien arteko giltzadurak (koma bat, «que» bat, «y» bat) ahalbidetzen du nahastea. Hasieraren arabera familiatan bildu ditut: familia berean, erdiak ia beti egokitzen dira.',
+      combos:'{n} buru × {n} buztan = {z} nahasketa posible',count:'{n} esaera',mixFam:'Familia hau nahastu',onlyFam:'Bakarrik'},
+  es:{t1:'Refrank',t2:'enstein',top:'Buscar',topTitle:'Tus refranes favoritos',noVotes:'Aún no has marcado ninguno. Dale al ♡ en los refranes que te gusten.',voteT:'♥',errOff:'Ahora mismo no se puede votar. Vuelve a probar más tarde.',adminL:'Administración',email:'Correo',pass:'Contraseña',login:'Entrar',logout:'Salir de la administración',errLogin:'Correo o contraseña incorrectos.',searchPh:'Buscar refranes (ej.: gato, agua…)',results:'{n} resultados',noRes:'No hay ninguno con esa palabra.',share:'Compartir',today:'Refrán del día',realNote:'Solo refranes y dichos reales, de los que se dicen de verdad. Nada de inventos: para eso ya está la Mezcla.',mean:'¿Qué significa? (opcional)',place:'¿Dónde se dice? Pueblo, comarca… (opcional)',realChk:'Es un refrán real que he oído o leído',errReal:'Marca la casilla para confirmar que es un refrán real.',similar:'Ojo, ya tenemos uno parecido:',simHint:'Si es una variante de otro sitio, puedes enviarlo igual.',meanL:'Significado',withdraw:'Retirar',modHint:'Puedes corregir la ortografía antes de aprobar.',sendTab:'Aportar',sendTitle:'Aporta tu refrán',sendIntro:'Escribe la primera y la segunda mitad y elige la lengua. Se revisa antes de entrar en el lote.',part1:'Primera mitad',part2:'Segunda mitad',langL:'Lengua',alias:'Tu nombre o apodo (opcional)',send:'Enviar',sent:'¡Enviado! Queda pendiente de revisión.',errShort:'Las dos mitades tienen que tener texto (entre 2 y 80 caracteres).',errBad:'Ese texto no pasa el filtro. Prueba con otras palabras.',errDup:'Ese refrán ya está en el lote.',errWait:'Espera un poco antes de enviar otro.',errMax:'Tienes demasiados refranes pendientes. Espera a que se revisen.',errSave:'No se pudo guardar. Vuelve a probar.',preview:'Así quedaría',commaHint:'Si la primera mitad termina en coma, escríbela.',mine:'Tus aportaciones',stPend:'Pendiente',stOk:'Aprobado',stNo:'Rechazado',modTitle:'Revisión (solo tú)',approve:'Aprobar',reject:'Rechazar',noPend:'No hay nada pendiente.',by:'Aportado por',anon:'Anónimo',newTitle:'Últimas aportaciones',noNew:'Aún no hay aportaciones aprobadas en esta lengua.',back:'Volver al anterior',random:'Azar',mix:'Mezcla',anatomy:'Anatomía',another:'Otro refrán',shuffle:'Mezclar',
+      first:'Cambiar 1ª mitad',second:'Cambiar 2ª mitad',coherent:'Coherente',chaos:'Caos total',
+      coherentHint:'Solo mezcla refranes de la misma familia: suenan casi reales.',chaosHint:'Cualquier cabeza con cualquier cola.',refsIn:'Refranes en',all:'Todas',
+      origin:'Origen',copy:'Copiar',copied:'¡Copiado!',save:'Guardar',savedT:'¡Guardado!',saved:'Mis mezclas',
+      empty:'Aún no has guardado ninguna. Mezcla y pulsa «Guardar».',free:'Libres',head:'Cabeza',tail:'Cola',
+      intro:'Casi todos los refranes tienen dos mitades: una cabeza que plantea y una cola que remata. La bisagra entre ellas (una coma, un «que», un «y») es la que permite mezclarlos. Los he agrupado en familias según cómo empiezan: dentro de la misma familia, las mitades encajan casi siempre.',
+      combos:'{n} cabezas × {n} colas = {z} mezclas posibles',count:'{n} refranes',mixFam:'Mezclar esta familia',onlyFam:'Solo'}
+};
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let lang = store.get('ref_lang','gl');
+if (!LANGS.includes(lang)) lang = 'gl';
+const T = (k, vars={}) => (I18N[lang][k] || k).replace(/\{(\w+)\}/g, (_, v) => vars[v]);
+
+/* ---------- UTIL ---------- */
+const $ = id => document.getElementById(id);
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const join = (h, t) => h.head + (t.comma ? ', ' : ' ') + t.tail + '.';
+const toast = msg => { const el = $('toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 1800); };
+const copy = txt => { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast(T('copied'))).catch(() => toast(txt)); };
+const inLang = r => r.l === lang;
+function pool(l, f){ return R.filter(r => (l ? r.l === l : inLang(r)) && (!f || r.f === f)); }
+const byLine = r => r.pid ? `${T('by')} ${r.author || T('anon')}${r.place ? ' (' + r.place + ')' : ''}` : '';
+const meanLine = r => r.meaning ? `${T('meanL')}: ${r.meaning}` : '';
+
+function cardHTML(h, t, animH, animT, tag, foot){
+  return (tag ? `<span class="tag${tag === T('today') ? ' today' : ''}">${esc(tag)}</span>` : '') +
+    `<div class="half h ${animH ? 'in-l' : ''}">${esc(h.head)}${t.comma ? ',' : ''}</div>` +
+    `<div class="seam"></div>` +
+    `<div class="half t ${animT ? 'in-r' : ''}">${esc(t.tail)}.</div>` +
+    ((foot = [].concat(foot || []).filter(Boolean)).length ? `<div class="foot">${foot.map(esc).join('<br>')}</div>` : '');
+}
+
+/* ---------- FAVORITOS ♥ (gardados neste dispositivo) ---------- */
+const online = true;
+let myVotes = store.get('ref_hearts', {});
+function voteBtn(r){
+  const on = !!myVotes[r.id];
+  return `<button class="vote" data-vote="${r.id}" aria-pressed="${on}" aria-label="${T('voteT')}">${on ? '♥' : '♡'}</button>`;
+}
+function toggleVote(id){
+  const next = { ...myVotes };
+  if (next[id]) delete next[id]; else next[id] = Date.now();
+  myVotes = next; store.set('ref_hearts', myVotes);
+  refreshVotes();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-vote]'); if (b) toggleVote(b.dataset.vote);
+});
+function refreshVotes(){
+  if (cur) $('randVote').innerHTML = voteBtn(cur);
+  if (!$('top').hidden) renderTop();
+}
+function initOnline(){}
+function renderOnline(){ refreshVotes(); }
+
+/* ---------- ALEATORIO ---------- */
+let cur = null, todayRef = null;
+function dayPick(){
+  const d = new Date(), key = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + lang;
+  const p = BASE.filter(r => r.l === lang);
+  return p[parseInt(hash(key), 36) % p.length];
+}
+const hR = [], hM = [];
+const pushM = () => { if (mh && mt) hM.push([mh, mt]); };
+function newRandom(){
+  const p = pool();
+  let r; do { r = rnd(p); } while (p.length > 1 && r === cur);
+  if (cur) hR.push(cur);
+  cur = r; renderRandom(true);
+}
+function renderRandom(anim){
+  $('randBack').disabled = !hR.length;
+  $('randCard').innerHTML = cardHTML(cur, cur, anim, anim, cur === todayRef ? T('today') : famName(cur.l, cur.f), [meanLine(cur), byLine(cur)]);
+  $('randVote').innerHTML = voteBtn(cur);
+}
+
+/* ---------- MESTURA ---------- */
+let mode = store.get('ref_mode','coh');
+let famFilter = null;           // {l, f}
+let mh = null, mt = null;
+const basePool = () => famFilter ? pool(famFilter.l, famFilter.f) : pool();
+function pickHead(){
+  const p = basePool();
+  let x; do { x = rnd(p); } while (p.length > 1 && x === mh);
+  return x;
+}
+function pickTail(h){
+  const p = mode === 'coh' ? pool(h.l, h.f) : basePool();
+  const ok = p.filter(r => r !== h && r.tail !== h.tail && r !== mt);
+  return ok.length ? rnd(ok) : rnd(R.filter(r => r !== h && r.l === h.l));
+}
+function newMix(){ pushM(); mh = pickHead(); mt = pickTail(mh); renderMix(true, true); }
+function swapHead(){
+  pushM();
+  const p = mode === 'coh' ? pool(mt.l, mt.f) : basePool();
+  const ok = p.filter(r => r !== mt && r !== mh && r.head !== mt.head);
+  if (ok.length) mh = rnd(ok);
+  renderMix(true, false);
+}
+function swapTail(){ pushM(); mt = pickTail(mh); renderMix(false, true); }
+function renderMix(aH, aT){
+  $('mixBack').disabled = !hM.length;
+  $('mixCard').innerHTML = cardHTML(mh, mt, aH, aT) +
+    `<div class="origin"><b>${T('origin')}</b>
+      <p class="dh">${esc(join(mh, mh))}</p>
+      <p class="dt">${esc(join(mt, mt))}</p></div>`;
+}
+function renderMode(){
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+  $('modeHint').textContent = T(mode === 'coh' ? 'coherentHint' : 'chaosHint');
+  const chip = $('famChip');
+  if (famFilter){ chip.hidden = false; chip.textContent = `${T('onlyFam')}: ${famName(famFilter.l, famFilter.f)}  ✕`; }
+  else chip.hidden = true;
+}
+
+/* ---------- FAVORITOS ---------- */
+let favs = store.get('ref_favs', []);
+function renderFavs(){
+  const ul = $('favs');
+  if (!favs.length){ ul.innerHTML = `<li class="empty">${T('empty')}</li>`; return; }
+  ul.innerHTML = favs.map((f, i) => `<li><span>${esc(f)}</span><button class="x" data-del="${i}" aria-label="✕">✕</button></li>`).join('');
+}
+$('favs').addEventListener('click', e => {
+  const i = e.target.dataset.del; if (i === undefined) return;
+  favs.splice(+i, 1); store.set('ref_favs', favs); renderFavs();
+});
+
+/* ---------- TOP ---------- */
+function rowHTML(r, extra, own){
+  const ex = [].concat(extra || []).filter(Boolean).map(t => `<small>${esc(t)}</small>`).join('');
+  return `<li><span class="rt"><span class="eh">${esc(r.head)}${r.comma ? ',' : ''}</span> <span class="et">${esc(r.tail)}.</span>${ex}</span>${voteBtn(r)}</li>`;
+}
+function renderTop(){
+  const mine = pool().filter(r => myVotes[r.id]).sort((a, b) => myVotes[b.id] - myVotes[a.id]);
+  $('topList').innerHTML = mine.length ? mine.map(r => rowHTML(r, [meanLine(r)])).join('') : `<li class="empty">${T('noVotes')}</li>`;
+}
+
+/* ---------- BUSCAR ---------- */
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function renderSearch(){
+  const q = norm($('q').value.trim());
+  const ws = q.split(/\s+/).filter(w => w.length > 1);
+  if (!ws.length){ $('qList').innerHTML = ''; $('qCount').textContent = ''; return; }
+  const res = pool().filter(r => { const t = norm(r.head + ' ' + r.tail + ' ' + (r.meaning || '')); return ws.every(w => t.includes(w)); });
+  $('qCount').textContent = res.length ? T('results', { n: res.length }) : '';
+  $('qList').innerHTML = res.length
+    ? res.slice(0, 60).map(r => rowHTML(r, [meanLine(r), byLine(r)])).join('')
+    : `<li class="empty">${T('noRes')}</li>`;
+}
+let qT = 0;
+$('q').addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(renderSearch, 150); });
+
+/* ---------- ANATOMÍA ---------- */
+function renderAna(){
+  const n = pool().length;
+  $('combos').textContent = T('combos', { n, z: (n * (n - 1)).toLocaleString(lang) });
+  const all = FAMS[lang].map(([f]) => pool(lang, f).length);
+  const max = Math.max(...all);
+  $('fams').innerHTML = FAMS[lang].map(([f]) => {
+    const p = pool(lang, f); if (!p.length) return '';
+    const ex = rnd(p);
+    return `<div class="fam">
+      <div class="fam-top"><span class="fam-name">${esc(famName(lang, f))}</span><span class="fam-n">${T('count', { n: p.length })}</span></div>
+      <div class="bar"><i style="width:${(p.length / max * 100).toFixed(1)}%"></i></div>
+      <p class="ex"><span class="eh">${esc(ex.head)}${ex.comma ? ',' : ''}</span> <span class="et">${esc(ex.tail)}.</span></p>
+      <button class="btn sm" data-fam="${f}" data-l="${lang}">${T('mixFam')}</button>
+    </div>`;
+  }).join('');
+}
+$('fams').addEventListener('click', e => {
+  const f = e.target.dataset.fam; if (!f) return;
+  famFilter = { l: e.target.dataset.l, f }; mode = 'coh'; store.set('ref_mode', mode);
+  showTab('mix'); renderMode(); newMix();
+});
+
+/* ---------- TABS / IDIOMA ---------- */
+const TABS = ['rand','mix','top','ana'];
+function showTab(t){
+  document.querySelectorAll('[role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  TABS.forEach(s => $(s).hidden = s !== t);
+  if (t === 'ana') renderAna();
+  if (t === 'top') renderTop();
+}
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => el.textContent = T(el.dataset.i));
+  document.querySelectorAll('[data-ph]').forEach(el => el.placeholder = T(el.dataset.ph));
+  document.querySelectorAll('[data-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
+  renderMode(); renderFavs(); renderRandom(false); renderMix(false, false);
+  if (!$('ana').hidden) renderAna();
+  if (!$('top').hidden) renderTop();
+}
+
+document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => {
+  lang = b.dataset.lang; store.set('ref_lang', lang);
+  famFilter = null; hR.length = 0; hM.length = 0;
+  cur = todayRef = dayPick(); mh = null; mt = null; mh = pickHead(); mt = pickTail(mh);
+  $('q').value = ''; applyLang(); renderSearch();
+});
+document.querySelectorAll('[role=tab]').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+document.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { mode = b.dataset.mode; store.set('ref_mode', mode); renderMode(); newMix(); });
+$('famChip').onclick = () => { famFilter = null; renderMode(); newMix(); };
+$('randBtn').onclick = newRandom;
+$('randBack').onclick = () => { if (hR.length) { cur = hR.pop(); renderRandom(true); } };
+$('mixBack').onclick = () => { if (hM.length) { [mh, mt] = hM.pop(); renderMix(true, true); } };
+function share(txt){
+  const text = txt + '\n— Refrankenstein';
+  if (navigator.share) navigator.share({ text }).catch(e => { if (!e || e.name !== 'AbortError') copy(txt); });
+  else copy(txt);
+}
+$('randCopy').onclick = () => share(join(cur, cur));
+$('mixBtn').onclick = newMix;
+$('swapH').onclick = swapHead;
+$('swapT').onclick = swapTail;
+$('mixCopy').onclick = () => share(join(mh, mt));
+$('mixSave').onclick = () => {
+  const s = join(mh, mt);
+  if (!favs.includes(s)){ favs.unshift(s); store.set('ref_favs', favs); renderFavs(); }
+  toast(T('savedT'));
+};
+document.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea,select,button') && e.key === ' ') return;
+  if (e.target.closest && e.target.closest('input,textarea,select')) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const r = !$('rand').hidden, m = !$('mix').hidden;
+  if (!r && !m) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); r ? newRandom() : newMix(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); (r ? $('randBack') : $('mixBack')).click(); }
+  else if (m && e.key === '1') swapHead();
+  else if (m && e.key === '2') swapTail();
+});
+
+cur = todayRef = dayPick(); mh = pickHead(); mt = pickTail(mh);
+showTab('rand'); applyLang(); renderOnline();
+initOnline();
+
+</script>
+</body>
+</html>
